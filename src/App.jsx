@@ -14,9 +14,6 @@ class App extends React.Component {
     const { text } = this.state;
     const options = {
       cursorStyle: 'line',
-      defaultValue: '',
-      folding: false,
-      glyphMargin: false,
       language: 'markdown',
       lightbulb: {
         enabled: false,
@@ -24,12 +21,22 @@ class App extends React.Component {
       lineDecorationsWidth: 0,
       lineNumbers: 'off',
       lineNumbersMinChars: 0,
+      wordWrap: 'on',
+      minimap: {
+        enabled: true,
+        showSlider: 'always',
+      },
       quickSuggestions: false,
       readOnly: false,
       roundedSelection: false,
       theme: 'vs',
       trimAutoWhitespace: false,
-      unicodeHighlight: true,
+      unicodeHighlight: {
+        ambigousCharacters: true,
+        includeComments: true,
+        includeStrings: true,
+        invisibleCharacters: true,
+      },
       wrappingIndent: 'same',
     };
 

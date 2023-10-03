@@ -1,5 +1,6 @@
 import Monaco from '@monaco-editor/react';
 import React from 'react';
+import './TextEditor.css';
 
 class TextEditor extends React.Component {
   constructor() {
@@ -10,16 +11,34 @@ class TextEditor extends React.Component {
   }
 
   onEditorDidMount(editor) {
+    this.editor = editor;
     editor.onDidBlurEditorText(this.onEditorTextBlur);
     editor.onDidFocusEditorText(this.onEditorTextFocus);
   }
 
   onEditorTextFocus() {
-    console.log('onEditorTextFocus');
+    this.decorations.clear();
   }
 
   onEditorTextBlur() {
-    console.log('onEditorTextBlur');
+    const position = this.editor.getPosition();
+    this.decorations = this.editor.createDecorationsCollection([
+      {
+        range: new window.monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column + 1,
+        ),
+        options: {
+          className: 'my-bookmark',
+          minimap: {
+            color: 'red',
+            position: 2,
+          },
+        },
+      },
+    ]);
   }
 
   render() {
@@ -37,6 +56,7 @@ class TextEditor extends React.Component {
         enabled: true,
         showSlider: 'always',
       },
+      occurrencesHighlight: false,
       quickSuggestions: false,
       readOnly: false,
       roundedSelection: false,

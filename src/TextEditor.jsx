@@ -13,10 +13,19 @@ class TextEditor extends React.Component {
   }
 
   // eslint-disable-next-line react/sort-comp
-  onEditorDidMount(editor) {
+  onEditorDidMount(editor, monaco) {
     this.editorRef = editor;
-    editor.onDidBlurEditorText(this.onEditorTextBlur);
-    editor.onDidFocusEditorText(this.onEditorTextFocus);
+    this.editorRef.onDidBlurEditorText(this.onEditorTextBlur);
+    this.editorRef.onDidFocusEditorText(this.onEditorTextFocus);
+    monaco.editor.defineTheme('myTheme', {
+      base: 'vs',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.lineHighlightBackground': '#EAEFF6',
+      },
+    });
+    monaco.editor.setTheme('myTheme');
   }
 
   componentWillUnmount() {
@@ -61,7 +70,6 @@ class TextEditor extends React.Component {
       lightbulb: {
         enabled: false,
       },
-      lineDecorationsWidth: 0,
       lineNumbers: 'off',
       lineNumbersMinChars: 0,
       wordWrap: 'on',

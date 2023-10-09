@@ -3,13 +3,12 @@ import React from 'react';
 import './MonacoEditorWrapper.css';
 
 class MonacoEditorWrapper extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.onChangeModelContent = this.onChangeModelContent.bind(this);
     this.onEditorDidMount = this.onEditorDidMount.bind(this);
     this.onEditorTextBlur = this.onEditorTextBlur.bind(this);
     this.editor = null;
-
     this.state = { decorations: null };
   }
 

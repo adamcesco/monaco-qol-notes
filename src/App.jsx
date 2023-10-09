@@ -1,9 +1,8 @@
 import React from 'react';
 import { save, open, message } from '@tauri-apps/api/dialog';
-import { emit, listen } from '@tauri-apps/api/event';
+import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
-// add global short cuts for monaco editor
 
 window.onkeydown = (e) => {
   if (e.ctrlKey && e.code === 'KeyP') {
@@ -11,21 +10,12 @@ window.onkeydown = (e) => {
   }
   if (e.ctrlKey && e.code === 'KeyO') {
     e.preventDefault();
-    emit('file-menu-event', {
-      payload: 'open',
-    });
   }
   if (e.ctrlKey && e.code === 'KeyS') {
     e.preventDefault();
-    emit('file-menu-event', {
-      payload: 'save',
-    });
   }
   if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
     e.preventDefault();
-    emit('file-menu-event', {
-      payload: 'save-as',
-    });
   }
 };
 
@@ -82,7 +72,7 @@ class App extends React.Component {
           this.filePathRef.current = filePath;
         })
         .catch(async (error) => {
-          await message(`An error occured while writing to the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Writing Error', type: 'error' });
+          await message(`An error occured while saving to the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Saving Error', type: 'error' });
         });
     }
   }
@@ -102,14 +92,16 @@ class App extends React.Component {
           this.editorRef.editor.setValue(result);
         })
         .catch(async (error) => {
-          await message(`An error occured while opening the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Writing Error', type: 'error' });
+          await message(`An error occured while opening the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Opening Error', type: 'error' });
         });
     }
   }
 
   render() {
     return (
-      <MonacoEditorWrapper ref={(ref) => { this.editorRef = ref; }} />
+      <MonacoEditorWrapper
+        ref={(ref) => { this.editorRef = ref; }}
+      />
     );
   }
 }

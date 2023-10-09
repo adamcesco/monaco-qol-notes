@@ -1,5 +1,5 @@
 import React from 'react';
-import { save, open } from '@tauri-apps/api/dialog';
+import { save, open, message } from '@tauri-apps/api/dialog';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
@@ -57,7 +57,9 @@ class App extends React.Component {
     }
     if (this.filePathRef.current !== null) {
       invoke('write_file', { invokePath: this.filePathRef.current, invokeContent: this.editorRef.editor.getValue() })
-        .catch((error) => { console.log(error); });
+        .catch(async (error) => {
+          await message(`An error occured while writing to the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Writing Error', type: 'error' });
+        });
     }
   }
 
@@ -75,7 +77,9 @@ class App extends React.Component {
           this.filePathRef.current = filePath;
           this.editorRef.editor.setValue(result);
         })
-        .catch((error) => { console.log(error); });
+        .catch(async (error) => {
+          await message(`An error occured while opening the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Writing Error', type: 'error' });
+        });
     }
   }
 

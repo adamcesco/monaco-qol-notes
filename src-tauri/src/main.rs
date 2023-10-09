@@ -6,13 +6,13 @@ use std::fs;
 use std::path::Path;
 
 #[tauri::command]
-fn get_file_content(invoke_filepath: &str) -> String { //todo: handle error case
+fn get_file_content(invoke_filepath: &str) -> String {
     let content = fs::read_to_string(invoke_filepath).expect("ERROR");
     content
 }
 
 #[tauri::command]
-fn write_file(invoke_path: &str, invoke_content: &str) -> String { //todo: handle error case
+fn write_file(invoke_path: &str, invoke_content: &str) -> String {
     let file_path = Path::new(invoke_path);
     let result = match fs::write(file_path, invoke_content) {
         Ok(()) => String::from("OK"),

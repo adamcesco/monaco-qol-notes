@@ -1,22 +1,26 @@
-import Monaco from '@monaco-editor/react';
+import MonacoEditor from '@monaco-editor/react';
 import React from 'react';
-import './TextEditor.css';
+import './MonacoEditorWrapper.css';
 
-class TextEditor extends React.Component {
+class MonacoEditorWrapper extends React.Component {
   constructor() {
     super();
+    this.onChangeModelContent = this.onChangeModelContent.bind(this);
     this.onEditorDidMount = this.onEditorDidMount.bind(this);
-    this.onEditorTextFocus = this.onEditorTextFocus.bind(this);
     this.onEditorTextBlur = this.onEditorTextBlur.bind(this);
-    this.decorations = null;
-    this.editorRef = null;
+    this.editor = null;
+
+    this.state = { decorations: null };
   }
 
-  // eslint-disable-next-line react/sort-comp
+  componentWillUnmount() {
+    this.editor.dispose();
+  }
+
   onEditorDidMount(editor, monaco) {
-    this.editorRef = editor;
-    this.editorRef.onDidBlurEditorText(this.onEditorTextBlur);
-    this.editorRef.onDidFocusEditorText(this.onEditorTextFocus);
+    this.editor = editor;
+    this.editor.onDidChangeModelContent(this.onChangeModelContent);
+    this.editor.onDidBlurEditorText(this.onEditorTextBlur);
     monaco.editor.defineTheme('myTheme', {
       base: 'vs',
       inherit: true,
@@ -28,39 +32,39 @@ class TextEditor extends React.Component {
     monaco.editor.setTheme('myTheme');
   }
 
-  componentWillUnmount() {
-    this.editorRef.dispose();
-  }
-
-  onEditorTextFocus() {
-    if (this.decorations !== null) {
-      this.decorations.clear();
+  onChangeModelContent() {
+    const { decorations } = this.state;
+    if (decorations !== null) {
+      decorations.clear();
     }
   }
 
   onEditorTextBlur() {
-    if (this.editorRef === null) {
+    if (this.editor === null) {
       return;
     }
 
-    const { lineNumber, column } = this.editorRef.getPosition();
-    this.decorations = this.editorRef.createDecorationsCollection([
-      {
-        range: new window.monaco.Range(
-          lineNumber,
-          column,
-          lineNumber,
-          column + 1,
-        ),
-        options: {
-          className: 'my-bookmark',
-          minimap: {
-            color: 'red',
-            position: 2,
+    const { lineNumber, column } = this.editor.getPosition();
+
+    this.setState({
+      decorations: this.editor.createDecorationsCollection([
+        {
+          range: new window.monaco.Range(
+            lineNumber,
+            column,
+            lineNumber,
+            column + 1,
+          ),
+          options: {
+            className: 'my-bookmark',
+            minimap: {
+              color: 'red',
+              position: 2,
+            },
           },
         },
-      },
-    ]);
+      ]),
+    });
   }
 
   render() {
@@ -92,7 +96,7 @@ class TextEditor extends React.Component {
     };
 
     return (
-      <Monaco
+      <MonacoEditor
         height="90vh"
         options={options}
         onMount={this.onEditorDidMount}
@@ -101,4 +105,4 @@ class TextEditor extends React.Component {
   }
 }
 
-export default TextEditor;
+export default MonacoEditorWrapper;

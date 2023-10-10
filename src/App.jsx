@@ -4,6 +4,10 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
 
+// todo: auto-generated table of contents using a file's headers
+// todo: auto highlighting "to-do" comments
+// todo: Picture-in-Picture note taking
+
 window.onkeydown = (e) => {
   if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
     e.preventDefault();
@@ -49,8 +53,8 @@ class App extends React.Component {
     this.unlistenFileMenuRef.current.then((remove) => remove());
   }
 
-  async onSave(fp) {
-    const filePath = fp || await save({
+  async onSave(filePathVal) {
+    const filePath = filePathVal || await save({
       defaultPath: 'untitled.md',
       filters: [{
         name: 'md',
@@ -58,12 +62,12 @@ class App extends React.Component {
       }],
     });
     if (filePath !== null) {
-      invoke('write_file', { invokePath: this.filePathRef.current, invokeContent: this.editorRef.editor.getValue() })
+      invoke('write_file', { invokePath: filePath, invokeContent: this.editorRef.editor.getValue() })
         .then(() => {
           this.filePathRef.current = filePath;
         })
         .catch(async (error) => {
-          await message(`An error occured while saving to the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Saving Error', type: 'error' });
+          await message(`An error occured while saving to the following filepath: ${filePath}.\n\nThe details of the error are: ${error}`, { title: 'File Saving Error', type: 'error' });
         });
     }
   }
@@ -83,7 +87,7 @@ class App extends React.Component {
           this.editorRef.editor.setValue(result);
         })
         .catch(async (error) => {
-          await message(`An error occured while opening the following filepath: ${this.filePathRef.current}.\n\nThe details of the error are: ${error}`, { title: 'File Opening Error', type: 'error' });
+          await message(`An error occured while opening the following filepath: ${filePath}.\n\nThe details of the error are: ${error}`, { title: 'File Opening Error', type: 'error' });
         });
     }
   }

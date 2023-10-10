@@ -18,7 +18,6 @@ fn write_file(invoke_path: &str, invoke_content: &str) -> String {
         Ok(()) => String::from("OK"),
         Err(_err) => String::from("ERROR")
     };
-
     result
 }
 

@@ -5,15 +5,6 @@ import { invoke } from '@tauri-apps/api/tauri';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
 
 window.onkeydown = (e) => {
-  if (e.ctrlKey && e.code === 'KeyP') {
-    e.preventDefault();
-  }
-  if (e.ctrlKey && e.code === 'KeyO') {
-    e.preventDefault();
-  }
-  if (e.ctrlKey && e.code === 'KeyS') {
-    e.preventDefault();
-  }
   if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
     e.preventDefault();
   }

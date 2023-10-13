@@ -7,18 +7,13 @@ import MonacoEditorWrapper from './MonacoEditorWrapper';
 
 // todo: auto highlighting "to-do" comments
 
-window.onkeydown = (e) => {
-  if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
-    e.preventDefault();
-  }
-};
-
 class App extends React.Component {
   constructor() {
     super();
     this.unlistenFileMenuRef = React.createRef();
     this.onSave = this.onSave.bind(this);
     this.onOpen = this.onOpen.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.filePathRef = React.createRef();
     this.editorRef = null;
     this.state = {
@@ -27,6 +22,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    document.addEventListener('keydown', this.handleKeyPress);
     this.unlistenFileMenuRef.current = listen('menu-event', async (event) => {
       switch (event.payload) {
         case 'open': {
@@ -69,7 +65,27 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyPress);
     this.unlistenFileMenuRef.current.then((remove) => remove());
+  }
+
+  handleKeyPress(e) {
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
+      e.preventDefault();
+      this.onSave(null);
+    } else if (e.ctrlKey && e.code === 'KeyO') {
+      this.onOpen();
+    } else if (e.ctrlKey && e.code === 'KeyS') {
+      this.onSave(this.filePathRef.current);
+    } else if (e.ctrlKey && e.code === 'KeyT') {
+      const { onTop } = this.state;
+      this.setState({ onTop: !onTop });
+      appWindow.setAlwaysOnTop(!onTop);
+    } else if (e.ctrlKey && e.code === 'Equal') {
+      this.editorRef.editor.trigger('editor', 'editor.action.fontZoomIn');
+    } else if (e.ctrlKey && e.code === 'Minus') {
+      this.editorRef.editor.trigger('editor', 'editor.action.fontZoomOut');
+    }
   }
 
   async onSave(filePathVal) {

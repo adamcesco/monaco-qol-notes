@@ -2,11 +2,10 @@ import React from 'react';
 import { save, open, message } from '@tauri-apps/api/dialog';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
+import { appWindow } from '@tauri-apps/api/window';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
 
-// todo: auto-generated table of contents using a file's headers
 // todo: auto highlighting "to-do" comments
-// todo: Picture-in-Picture note taking
 
 window.onkeydown = (e) => {
   if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
@@ -22,10 +21,13 @@ class App extends React.Component {
     this.onOpen = this.onOpen.bind(this);
     this.filePathRef = React.createRef();
     this.editorRef = null;
+    this.state = {
+      onTop: false,
+    };
   }
 
   componentDidMount() {
-    this.unlistenFileMenuRef.current = listen('file-menu-event', async (event) => {
+    this.unlistenFileMenuRef.current = listen('menu-event', async (event) => {
       switch (event.payload) {
         case 'open': {
           this.onOpen();
@@ -39,6 +41,23 @@ class App extends React.Component {
 
         case 'save-as': {
           this.onSave(null);
+          break;
+        }
+
+        case 'tog-on-top': {
+          const { onTop } = this.state;
+          this.setState({ onTop: !onTop });
+          await appWindow.setAlwaysOnTop(!onTop);
+          break;
+        }
+
+        case 'zoom-in': {
+          this.editorRef.editor.trigger('editor', 'editor.action.fontZoomIn');
+          break;
+        }
+
+        case 'zoom-out': {
+          this.editorRef.editor.trigger('editor', 'editor.action.fontZoomOut');
           break;
         }
 
@@ -74,7 +93,6 @@ class App extends React.Component {
 
   async onOpen() {
     const filePath = await open({
-      defaultPath: 'untitled.md',
       filters: [{
         name: 'md',
         extensions: ['md', 'txt'],
@@ -95,6 +113,7 @@ class App extends React.Component {
   render() {
     return (
       <MonacoEditorWrapper
+        id="editor"
         ref={(ref) => { this.editorRef = ref; }}
       />
     );

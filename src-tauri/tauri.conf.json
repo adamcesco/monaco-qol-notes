@@ -14,52 +14,21 @@
     "allowlist": {
       "all": false,
       "dialog": {
+        "confirm": true,
+        "message": true,
         "open": true,
-        "save": true,
-        "message": true
+        "save": true
       },
       "shell": {
         "all": false,
         "open": true
       },
-      "globalShortcut": {
-        "all": true
-      },
       "window": {
         "all": false,
-        "center": false,
-        "close": false,
         "create": true,
-        "hide": false,
-        "maximize": false,
-        "minimize": false,
-        "print": false,
-        "requestUserAttention": false,
+        "close": true,
         "setAlwaysOnTop": true,
-        "setClosable": false,
-        "setContentProtected": false,
-        "setCursorGrab": false,
-        "setCursorIcon": false,
-        "setCursorPosition": false,
-        "setCursorVisible": false,
-        "setDecorations": false,
-        "setFocus": false,
-        "setFullscreen": false,
-        "setIcon": false,
-        "setIgnoreCursorEvents": false,
-        "setMaxSize": false,
-        "setMaximizable": false,
-        "setMinSize": false,
-        "setMinimizable": false,
-        "setPosition": false,
-        "setResizable": false,
-        "setSize": false,
-        "setSkipTaskbar": false,
-        "setTitle": false,
-        "show": false,
-        "startDragging": true,
-        "unmaximize": false,
-        "unminimize": false
+        "startDragging": true
       }
     },
     "bundle": {

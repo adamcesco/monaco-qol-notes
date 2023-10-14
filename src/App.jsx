@@ -1,20 +1,30 @@
 import React from 'react';
-import { save, open, message } from '@tauri-apps/api/dialog';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
 import { appWindow } from '@tauri-apps/api/window';
+import { save, open, message, confirm } from '@tauri-apps/api/dialog';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
 
 // todo: auto highlighting "to-do" comments
+// todo: add viewable list of keybinds
+// todo: allow users to change theme
+// todo: allow users to change keybinds
+// todo: give users a visual indicator of unsaved changes
+// todo: give users a visual indicator of always on top
 
 class App extends React.Component {
+  static async askToContinueUnsaved() {
+    return confirm('You have unsaved changes. Continue?', { title: 'Save Changes?' });
+  }
+
   constructor() {
     super();
     this.unlistenFileMenuRef = React.createRef();
+    this.unlistenCloseRequestedRef = React.createRef();
+    this.filePathRef = React.createRef();
+    this.onKeyDown = this.onKeyDown.bind(this);
     this.onSave = this.onSave.bind(this);
     this.onOpen = this.onOpen.bind(this);
-    this.handleKeyPress = this.handleKeyPress.bind(this);
-    this.filePathRef = React.createRef();
     this.editorRef = null;
     this.state = {
       onTop: false,
@@ -22,20 +32,42 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    document.addEventListener('keydown', this.handleKeyPress);
+    document.addEventListener('keydown', this.onKeyDown);
+    this.unlistenCloseRequestedRef.current = appWindow.onCloseRequested(async (event) => {
+      if (this.editorRef.didChangeModelContent.current === false) {
+        appWindow.close();
+        return;
+      }
+      const result = await App.askToContinueUnsaved();
+      if (result === false) {
+        event.preventDefault();
+        return;
+      }
+      appWindow.close();
+    });
     this.unlistenFileMenuRef.current = listen('menu-event', async (event) => {
       switch (event.payload) {
         case 'open': {
+          if (this.editorRef.didChangeModelContent.current === false) {
+            this.onOpen();
+            break;
+          }
+          const result = await App.askToContinueUnsaved();
+          if (result === false) {
+            break;
+          }
           this.onOpen();
           break;
         }
 
         case 'save': {
+          this.editorRef.didChangeModelContent.current = false;
           this.onSave(this.filePathRef.current);
           break;
         }
 
         case 'save-as': {
+          this.editorRef.didChangeModelContent.current = false;
           this.onSave(null);
           break;
         }
@@ -65,25 +97,26 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleKeyPress);
+    document.removeEventListener('keydown', this.onKeyDown);
+    this.unlistenCloseRequestedRef.current.then((remove) => remove());
     this.unlistenFileMenuRef.current.then((remove) => remove());
   }
 
-  handleKeyPress(e) {
-    if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
-      e.preventDefault();
+  onKeyDown(event) {
+    if (event.ctrlKey && event.shiftKey && event.code === 'KeyS') {
+      event.preventDefault();
       this.onSave(null);
-    } else if (e.ctrlKey && e.code === 'KeyO') {
+    } else if (event.ctrlKey && event.code === 'KeyO') {
       this.onOpen();
-    } else if (e.ctrlKey && e.code === 'KeyS') {
+    } else if (event.ctrlKey && event.code === 'KeyS') {
       this.onSave(this.filePathRef.current);
-    } else if (e.ctrlKey && e.code === 'KeyT') {
+    } else if (event.ctrlKey && event.code === 'KeyT') {
       const { onTop } = this.state;
       this.setState({ onTop: !onTop });
       appWindow.setAlwaysOnTop(!onTop);
-    } else if (e.ctrlKey && e.code === 'Equal') {
+    } else if (event.ctrlKey && event.code === 'Equal') {
       this.editorRef.editor.trigger('editor', 'editor.action.fontZoomIn');
-    } else if (e.ctrlKey && e.code === 'Minus') {
+    } else if (event.ctrlKey && event.code === 'Minus') {
       this.editorRef.editor.trigger('editor', 'editor.action.fontZoomOut');
     }
   }

@@ -9,6 +9,7 @@ class MonacoEditorWrapper extends React.Component {
     this.onEditorDidMount = this.onEditorDidMount.bind(this);
     this.onEditorTextBlur = this.onEditorTextBlur.bind(this);
     this.editor = null;
+    this.didChangeModelContent = React.createRef();
     this.state = { decorations: null };
   }
 
@@ -19,6 +20,7 @@ class MonacoEditorWrapper extends React.Component {
   onEditorDidMount(editor, monaco) {
     this.editor = editor;
     this.editor.onDidChangeModelContent(this.onChangeModelContent);
+    this.didChangeModelContent.current = false;
     this.editor.onDidBlurEditorText(this.onEditorTextBlur);
     monaco.editor.defineTheme('myTheme', {
       base: 'vs',
@@ -32,6 +34,7 @@ class MonacoEditorWrapper extends React.Component {
   }
 
   onChangeModelContent() {
+    this.didChangeModelContent.current = true;
     const { decorations } = this.state;
     if (decorations !== null) {
       decorations.clear();

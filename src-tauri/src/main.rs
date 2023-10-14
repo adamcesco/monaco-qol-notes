@@ -65,9 +65,6 @@ fn main() {
             "file-save-as" => {
                 event.window().emit("menu-event", "save-as").unwrap();
             }
-            "quit" => {
-                std::process::exit(0);
-            }
             "tog-on-top" => {
                 event.window().emit("menu-event", "tog-on-top").unwrap();
             }

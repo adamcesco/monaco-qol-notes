@@ -13,9 +13,22 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "dialog": {
+        "confirm": true,
+        "message": true,
+        "open": true,
+        "save": true
+      },
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "all": false,
+        "create": true,
+        "close": true,
+        "setAlwaysOnTop": true,
+        "startDragging": true
       }
     },
     "bundle": {

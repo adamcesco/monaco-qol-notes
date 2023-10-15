@@ -2,6 +2,7 @@ import React from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
 import { appWindow } from '@tauri-apps/api/window';
+// eslint-disable-next-line object-curly-newline
 import { save, open, message, confirm } from '@tauri-apps/api/dialog';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
 
@@ -13,10 +14,6 @@ import MonacoEditorWrapper from './MonacoEditorWrapper';
 // todo: give users a visual indicator of always on top
 
 class App extends React.Component {
-  static async askToContinueUnsaved() {
-    return confirm('You have unsaved changes. Continue?', { title: 'Save Changes?' });
-  }
-
   constructor() {
     super();
     this.unlistenFileMenuRef = React.createRef();
@@ -38,7 +35,7 @@ class App extends React.Component {
         appWindow.close();
         return;
       }
-      const result = await App.askToContinueUnsaved();
+      const result = await confirm('You have unsaved changes. Continue?', { title: 'Contiue?', okLabel: 'Yes', type: 'warning' });
       if (result === false) {
         event.preventDefault();
         return;
@@ -52,7 +49,7 @@ class App extends React.Component {
             this.onOpen();
             break;
           }
-          const result = await App.askToContinueUnsaved();
+          const result = await confirm('You have unsaved changes. Continue?', { title: 'Contiue?', okLabel: 'Yes', type: 'warning' });
           if (result === false) {
             break;
           }

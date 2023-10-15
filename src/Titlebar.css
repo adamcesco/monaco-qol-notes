@@ -1,11 +1,23 @@
-.titlebar {
+.titlebar{
     top: 0;
-    right: 0;
     user-select: none;
     display: flex;
-    justify-content: flex-end;
+    vertical-align: middle;
+    justify-content: space-between;
+}
+
+.menu-bar {
+    user-select: none;
+    display: flex;
     vertical-align: middle;
 }
+
+.window-action-bar {
+    user-select: none;
+    display: flex;
+    vertical-align: middle;
+}
+
 .titlebar-button {
     display: inline-flex;
     justify-content: center;

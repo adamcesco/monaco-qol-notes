@@ -5,6 +5,7 @@ import { appWindow } from '@tauri-apps/api/window';
 // eslint-disable-next-line object-curly-newline
 import { save, open, message, confirm } from '@tauri-apps/api/dialog';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
+import './App.css';
 
 // todo: auto highlighting "to-do" comments
 // todo: add viewable list of keybinds
@@ -119,6 +120,14 @@ class App extends React.Component {
   }
 
   async onSave(filePathVal) {
+    if (filePathVal !== null && filePathVal === this.filePathRef.current) {
+      invoke('write_file', { invokePath: filePathVal, invokeContent: this.editorRef.editor.getValue() })
+        .catch(async (error) => {
+          await message(`An error occured while saving to the following filepath: ${filePathVal}.\n\nThe details of the error are: ${error}`, { title: 'File Saving Error', type: 'error' });
+        });
+      return;
+    }
+
     const filePath = filePathVal || await save({
       defaultPath: 'untitled.md',
       filters: [{
@@ -158,10 +167,31 @@ class App extends React.Component {
 
   render() {
     return (
-      <MonacoEditorWrapper
-        id="editor"
-        ref={(ref) => { this.editorRef = ref; }}
-      />
+      <>
+        <div data-tauri-drag-region className="titlebar">
+          <div className="titlebar-button">
+            <img
+              src="https://api.iconify.design/mdi:window-minimize.svg"
+              alt="minimize"
+            />
+          </div>
+          <div className="titlebar-button">
+            <img
+              src="https://api.iconify.design/mdi:window-maximize.svg"
+              alt="maximize"
+            />
+          </div>
+          <div className="titlebar-button">
+            <img
+              src="https://api.iconify.design/mdi:close.svg"
+              alt="close"
+            />
+          </div>
+        </div>
+        <MonacoEditorWrapper
+          ref={(ref) => { this.editorRef = ref; }}
+        />
+      </>
     );
   }
 }

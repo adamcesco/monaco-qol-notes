@@ -28,7 +28,10 @@
         "create": true,
         "close": true,
         "setAlwaysOnTop": true,
-        "startDragging": true
+        "startDragging": true,
+        "minimize": true,
+        "maximize": true,
+        "unmaximize": true
       }
     },
     "bundle": {
@@ -52,7 +55,8 @@
         "resizable": true,
         "title": "quick-monaco",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "decorations": false
       }
     ]
   }

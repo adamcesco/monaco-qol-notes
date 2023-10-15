@@ -5,7 +5,7 @@ import { appWindow } from '@tauri-apps/api/window';
 // eslint-disable-next-line object-curly-newline
 import { save, open, message, confirm } from '@tauri-apps/api/dialog';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
-import './App.css';
+import Titlebar from './Titlebar';
 
 // todo: auto highlighting "to-do" comments
 // todo: add viewable list of keybinds
@@ -168,26 +168,7 @@ class App extends React.Component {
   render() {
     return (
       <>
-        <div data-tauri-drag-region className="titlebar">
-          <div className="titlebar-button">
-            <img
-              src="https://api.iconify.design/mdi:window-minimize.svg"
-              alt="minimize"
-            />
-          </div>
-          <div className="titlebar-button">
-            <img
-              src="https://api.iconify.design/mdi:window-maximize.svg"
-              alt="maximize"
-            />
-          </div>
-          <div className="titlebar-button">
-            <img
-              src="https://api.iconify.design/mdi:close.svg"
-              alt="close"
-            />
-          </div>
-        </div>
+        <Titlebar />
         <MonacoEditorWrapper
           ref={(ref) => { this.editorRef = ref; }}
         />

@@ -2,6 +2,8 @@ import MonacoEditor from '@monaco-editor/react';
 import React from 'react';
 import './MonacoEditorWrapper.css';
 
+// todo: fix bug: if you do close button twice, then it will produce decorations bug 
+
 class MonacoEditorWrapper extends React.Component {
   constructor(props) {
     super(props);
@@ -36,9 +38,11 @@ class MonacoEditorWrapper extends React.Component {
   onChangeModelContent() {
     this.didChangeModelContent.current = true;
     const { decorations } = this.state;
-    if (decorations !== null) {
-      decorations.clear();
+    if (decorations === null) {
+      return;
     }
+
+    decorations.clear();
   }
 
   onEditorTextBlur() {
@@ -47,26 +51,29 @@ class MonacoEditorWrapper extends React.Component {
     }
 
     const { lineNumber, column } = this.editor.getPosition();
+    const { decorations } = this.state;
 
-    this.setState({
-      decorations: this.editor.createDecorationsCollection([
-        {
-          range: new window.monaco.Range(
-            lineNumber,
-            column,
-            lineNumber,
-            column + 1,
-          ),
-          options: {
-            className: 'my-bookmark',
-            minimap: {
-              color: 'red',
-              position: 2,
+    if (decorations === null || decorations.length === 0) {
+      this.setState({
+        decorations: this.editor.createDecorationsCollection([
+          {
+            range: new window.monaco.Range(
+              lineNumber,
+              column,
+              lineNumber,
+              column + 1,
+            ),
+            options: {
+              className: 'my-bookmark',
+              minimap: {
+                color: 'red',
+                position: 2,
+              },
             },
           },
-        },
-      ]),
-    });
+        ]),
+      });
+    }
   }
 
   render() {

@@ -2,8 +2,6 @@ import MonacoEditor from '@monaco-editor/react';
 import React from 'react';
 import './MonacoEditorWrapper.css';
 
-// todo: fix bug: if you do close button twice, then it will produce decorations bug 
-
 class MonacoEditorWrapper extends React.Component {
   constructor(props) {
     super(props);

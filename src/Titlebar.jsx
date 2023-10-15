@@ -1,42 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { appWindow } from '@tauri-apps/api/window';
+import WindowActionButton from './WindowActionButton';
 import './Titlebar.css';
-
-function WindowActionButton({ ariaLabel, onClick, icon }) {
-  function onEnter(e) {
-    const { target } = e;
-    const { style } = target;
-    style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-  }
-  function onLeave(e) {
-    const { target } = e;
-    const { style } = target;
-    style.backgroundColor = 'transparent';
-  }
-  return (
-    <button
-      type="button"
-      className="titlebar-button"
-      aria-label={ariaLabel}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      onFocus={onEnter}
-      onBlur={onLeave}
-      onClick={onClick}
-    >
-      <img
-        src={icon}
-        alt={ariaLabel}
-      />
-    </button>
-  );
-}
-WindowActionButton.propTypes = {
-  ariaLabel: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  icon: PropTypes.string.isRequired,
-};
 
 class Titlebar extends React.Component {
   constructor() {
@@ -47,33 +12,37 @@ class Titlebar extends React.Component {
     };
   }
 
+  componentDidMount() {
+    appWindow.onResized(() => {
+      appWindow.isMaximized().then((isMaximized) => {
+        if (isMaximized) {
+          this.setState({ maximizeIcon: 'https://api.iconify.design/mdi:window-restore.svg' });
+          return;
+        }
+        this.setState({ maximizeIcon: 'https://api.iconify.design/mdi:window-maximize.svg' });
+      });
+    });
+  }
+
   render() {
     const { maximizeIcon } = this.state;
     return (
       <div data-tauri-drag-region className="titlebar">
         <WindowActionButton
-          ariaLabel="minimize"
+          purposeLabel="minimize"
           onClick={() => { appWindow.minimize(); }}
           icon="https://api.iconify.design/mdi:window-minimize.svg"
         />
         <WindowActionButton
-          ariaLabel="maximize"
-          onClick={() => {
-            appWindow.toggleMaximize();
-            appWindow.isMaximized().then((isMaximized) => {
-              if (isMaximized) {
-                this.setState({ maximizeIcon: 'https://api.iconify.design/mdi:window-maximize.svg' });
-                return;
-              }
-              this.setState({ maximizeIcon: 'https://api.iconify.design/mdi:window-restore.svg' });
-            });
-          }}
+          purposeLabel="maximize"
+          onClick={() => { appWindow.toggleMaximize(); }}
           icon={maximizeIcon}
         />
         <WindowActionButton
-          ariaLabel="close"
+          purposeLabel="close"
           onClick={() => { appWindow.close(); }}
           icon="https://api.iconify.design/mdi:close.svg"
+          onEnterColor="rgba(255, 50, 50)"
         />
       </div>
     );

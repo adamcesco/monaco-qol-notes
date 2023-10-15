@@ -43,6 +43,7 @@ class Titlebar extends React.Component {
           onClick={() => { appWindow.close(); }}
           icon="https://api.iconify.design/mdi:close.svg"
           onEnterColor="rgba(255, 50, 50)"
+          onEnterIcon="https://api.iconify.design/mdi:close.svg?color=white"
         />
       </div>
     );

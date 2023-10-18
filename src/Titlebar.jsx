@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { appWindow } from '@tauri-apps/api/window';
 import './Titlebar.css';
 
@@ -19,19 +20,18 @@ class Titlebar extends React.Component {
 
   constructor() {
     super();
-    this.miniButtonRef = null;
-    this.maxButtonRef = null;
-    this.closeButtonRef = null;
-    this.fileButtonRef = null;
-    this.viewButtonRef = null;
+    this.unlistenResizedRef = React.createRef();
+    this.unlistenEditorFocusRef = React.createRef();
     this.state = {
       // in tauri.config.json, we set the window to not be maximized by default
       maximizeIcon: 'https://api.iconify.design/mdi:window-maximize.svg',
+      displayFileMenu: false,
+      displayViewMenu: false,
     };
   }
 
   componentDidMount() {
-    appWindow.onResized(() => {
+    this.unlistenResizedRef.current = appWindow.onResized(() => {
       appWindow.isMaximized().then((isMaximized) => {
         if (isMaximized) {
           this.setState({ maximizeIcon: 'https://api.iconify.design/mdi:window-restore.svg' });
@@ -40,52 +40,112 @@ class Titlebar extends React.Component {
         this.setState({ maximizeIcon: 'https://api.iconify.design/mdi:window-maximize.svg' });
       });
     });
+    this.unlistenEditorFocusRef.current = appWindow.listen('editor-focus', () => {
+      this.setState({ displayFileMenu: false, displayViewMenu: false });
+    });
+  }
+
+  componentWillUnmount() {
+    this.unlistenResizedRef.current.then((remove) => remove());
+    this.unlistenEditorFocusRef.current.then((remove) => remove());
   }
 
   render() {
+    const {
+      onOpen,
+      onSave,
+      onAOTEnabled,
+      onZoomIn,
+      onZoomOut,
+      baseZIndex,
+    } = this.props;
     const { maximizeIcon } = this.state;
-    // todo: add file and view menu buttons
-    // todo: add file and view menu windows (divs)
+    const { displayFileMenu, displayViewMenu } = this.state;
     return (
-      <div data-tauri-drag-region className="titlebar">
+      <div
+        data-tauri-drag-region
+        className="titlebar"
+        style={{ zIndex: baseZIndex }}
+      >
         <div className="menu-bar">
           <button
             type="button"
-            ref={(ref) => { this.fileButtonRef = ref; }}
             className="titlebar-button"
             aria-label="file menu button"
-            onMouseEnter={() => Titlebar.setButtonVisuals(this.fileButtonRef, 'rgba(0, 0, 0, 0.1)')}
-            onMouseLeave={() => Titlebar.setButtonVisuals(this.fileButtonRef, 'transparent')}
-            onFocus={() => Titlebar.setButtonVisuals(this.fileButtonRef, 'transparent')}
-            onBlur={() => Titlebar.setButtonVisuals(this.fileButtonRef, 'transparent')}
-            onClick={() => { }}
+            onClick={() => { this.setState({ displayFileMenu: !displayFileMenu }); }}
           >
             File
           </button>
+          {displayFileMenu ? (
+            <div className="menu-window" style={{ zIndex: baseZIndex + 1 }}>
+              <button
+                type="button"
+                className="menu-option"
+                onClick={() => { onOpen(); appWindow.emit('request-editor-focus'); }}
+              >
+                <p>Open</p>
+                <p>Ctrl+O</p>
+              </button>
+              <button
+                type="button"
+                className="menu-option"
+                onClick={() => { onSave(false); appWindow.emit('request-editor-focus'); }}
+              >
+                <p>Save</p>
+                <p>Ctrl+S</p>
+              </button>
+              <button
+                type="button"
+                className="menu-option"
+                onClick={() => { onSave(true); appWindow.emit('request-editor-focus'); }}
+              >
+                <p>Save As</p>
+                <p>Ctrl+Shift+S</p>
+              </button>
+            </div>
+          ) : null}
           <button
             type="button"
-            ref={(ref) => { this.viewButtonRef = ref; }}
             className="titlebar-button"
             aria-label="view menu button"
-            onMouseEnter={() => Titlebar.setButtonVisuals(this.viewButtonRef, 'rgba(0, 0, 0, 0.1)')}
-            onMouseLeave={() => Titlebar.setButtonVisuals(this.viewButtonRef, 'transparent')}
-            onFocus={() => Titlebar.setButtonVisuals(this.viewButtonRef, 'transparent')}
-            onBlur={() => Titlebar.setButtonVisuals(this.viewButtonRef, 'transparent')}
-            onClick={() => { }}
+            onClick={() => { this.setState({ displayViewMenu: !displayViewMenu }); }}
           >
             View
           </button>
+          {displayViewMenu ? (
+            <div className="menu-window" style={{ zIndex: baseZIndex + 1 }}>
+              <button
+                type="button"
+                className="menu-option"
+                onClick={() => { onAOTEnabled(); appWindow.emit('request-editor-focus'); }}
+              >
+                <p>Toggle Always on Top</p>
+                <p>Ctrl+T</p>
+              </button>
+              <button
+                type="button"
+                className="menu-option"
+                onClick={() => { onZoomIn(); }}
+              >
+                <p>Zoom In</p>
+                <p>Ctrl+=</p>
+              </button>
+              <button
+                type="button"
+                className="menu-option"
+                onClick={() => { onZoomOut(); }}
+              >
+                <p>Zoom Out</p>
+                <p>Ctrl+-</p>
+              </button>
+            </div>
+          ) : null}
         </div>
         <div className="window-action-bar">
           <button
             type="button"
-            ref={(ref) => { this.miniButtonRef = ref; }}
             className="titlebar-button"
             aria-label="minimize"
-            onMouseEnter={() => Titlebar.setButtonVisuals(this.miniButtonRef, 'rgba(0, 0, 0, 0.1)')}
-            onMouseLeave={() => Titlebar.setButtonVisuals(this.miniButtonRef, 'transparent')}
-            onFocus={() => Titlebar.setButtonVisuals(this.miniButtonRef, 'transparent')}
-            onBlur={() => Titlebar.setButtonVisuals(this.miniButtonRef, 'transparent')}
             onClick={() => { appWindow.minimize(); }}
           >
             <img
@@ -95,13 +155,8 @@ class Titlebar extends React.Component {
           </button>
           <button
             type="button"
-            ref={(ref) => { this.maxButtonRef = ref; }}
             className="titlebar-button"
             aria-label="maximize"
-            onMouseEnter={() => Titlebar.setButtonVisuals(this.maxButtonRef, 'rgba(0, 0, 0, 0.1)')}
-            onMouseLeave={() => Titlebar.setButtonVisuals(this.maxButtonRef, 'transparent')}
-            onFocus={() => Titlebar.setButtonVisuals(this.maxButtonRef, 'transparent')}
-            onBlur={() => Titlebar.setButtonVisuals(this.maxButtonRef, 'transparent')}
             onClick={() => { appWindow.toggleMaximize(); }}
           >
             <img
@@ -111,14 +166,10 @@ class Titlebar extends React.Component {
           </button>
           <button
             type="button"
-            ref={(ref) => { this.closeButtonRef = ref; }}
             className="titlebar-button"
+            id="quit-button"
             aria-label="close"
-            onMouseEnter={() => Titlebar.setButtonVisuals(this.closeButtonRef, 'rgba(255, 50, 50)', 'https://api.iconify.design/mdi:close.svg?color=white')}
-            onMouseLeave={() => Titlebar.setButtonVisuals(this.closeButtonRef, 'transparent', 'https://api.iconify.design/mdi:close.svg')}
-            onFocus={() => Titlebar.setButtonVisuals(this.closeButtonRef, 'transparent')}
-            onBlur={() => Titlebar.setButtonVisuals(this.closeButtonRef, 'transparent')}
-            onClick={() => { appWindow.close(); }}
+            onClick={() => { appWindow.emit('xclose-requested'); }}
           >
             <img
               src="https://api.iconify.design/mdi:close.svg"
@@ -130,5 +181,13 @@ class Titlebar extends React.Component {
     );
   }
 }
+Titlebar.propTypes = {
+  onOpen: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onAOTEnabled: PropTypes.func.isRequired,
+  onZoomIn: PropTypes.func.isRequired,
+  onZoomOut: PropTypes.func.isRequired,
+  baseZIndex: PropTypes.number.isRequired,
+};
 
 export default Titlebar;

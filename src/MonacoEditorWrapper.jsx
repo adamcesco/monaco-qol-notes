@@ -1,13 +1,19 @@
 import MonacoEditor from '@monaco-editor/react';
 import React from 'react';
 import './MonacoEditorWrapper.css';
+import { appWindow } from '@tauri-apps/api/window';
 
 class MonacoEditorWrapper extends React.Component {
+  static onEditorTextFocus() {
+    appWindow.emit('editor-focus');
+  }
+
   constructor(props) {
     super(props);
     this.onChangeModelContent = this.onChangeModelContent.bind(this);
     this.onEditorDidMount = this.onEditorDidMount.bind(this);
     this.onEditorTextBlur = this.onEditorTextBlur.bind(this);
+    this.unlistenReqEditorFocusRef = React.createRef();
     this.editor = null;
     this.didChangeModelContent = React.createRef();
     this.state = { decorations: null };
@@ -22,6 +28,7 @@ class MonacoEditorWrapper extends React.Component {
     this.editor.onDidChangeModelContent(this.onChangeModelContent);
     this.didChangeModelContent.current = false;
     this.editor.onDidBlurEditorText(this.onEditorTextBlur);
+    this.editor.onDidFocusEditorText(MonacoEditorWrapper.onEditorTextFocus);
     monaco.editor.defineTheme('myTheme', {
       base: 'vs',
       inherit: true,
@@ -31,6 +38,15 @@ class MonacoEditorWrapper extends React.Component {
       },
     });
     monaco.editor.setTheme('myTheme');
+
+    this.unlistenReqEditorFocusRef.current = appWindow.listen('request-editor-focus', () => {
+      if (this.editor === null) {
+        return;
+      }
+
+      this.editor.focus();
+      appWindow.emit('editor-focus');
+    });
   }
 
   onChangeModelContent() {

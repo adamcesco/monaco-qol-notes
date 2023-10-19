@@ -39,6 +39,10 @@
     background-color: #e0e0e0;
 }
 
+.menu-option:focus {
+    background-color: #e0e0e0;
+}
+
 .window-action-bar {
     user-select: none;
     display: flex;

@@ -87,14 +87,19 @@ class App extends React.Component {
       event.preventDefault();
       this.onSave(null);
     } else if (event.ctrlKey && event.code === 'KeyO') {
+      event.preventDefault();
       this.onOpen();
     } else if (event.ctrlKey && event.code === 'KeyS') {
+      event.preventDefault();
       this.onSave(this.filePathRef.current);
     } else if (event.ctrlKey && event.code === 'KeyT') {
+      event.preventDefault();
       this.onToggleOnTop();
     } else if (event.ctrlKey && event.code === 'Equal') {
+      event.preventDefault();
       this.editorRef.editor.trigger('editor', 'editor.action.fontZoomIn');
     } else if (event.ctrlKey && event.code === 'Minus') {
+      event.preventDefault();
       this.editorRef.editor.trigger('editor', 'editor.action.fontZoomOut');
     }
   }

@@ -19,7 +19,6 @@ class App extends React.Component {
     super();
     this.unlistenFileMenuRef = React.createRef();
     this.unlistenCloseRequestedRef = React.createRef();
-    this.unlistenXCloseRequestedRef = React.createRef();
     this.filePathRef = React.createRef();
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onSave = this.onSave.bind(this);
@@ -34,7 +33,6 @@ class App extends React.Component {
 
   componentDidMount() {
     document.addEventListener('keydown', this.onKeyDown);
-    this.unlistenXCloseRequestedRef.current = appWindow.listen('xclose-requested', this.onClose);
     this.unlistenCloseRequestedRef.current = appWindow.onCloseRequested(this.onClose);
     this.unlistenFileMenuRef.current = listen('menu-event', async (event) => {
       switch (event.payload) {
@@ -78,7 +76,6 @@ class App extends React.Component {
   componentWillUnmount() {
     document.removeEventListener('keydown', this.onKeyDown);
     this.unlistenCloseRequestedRef.current.then((remove) => remove());
-    this.unlistenXCloseRequestedRef.current.then((remove) => remove());
     this.unlistenFileMenuRef.current.then((remove) => remove());
   }
 
@@ -184,9 +181,15 @@ class App extends React.Component {
         <Titlebar
           onOpen={this.onOpen}
           onSave={this.onSave}
+          onClose={this.onClose}
           onAOTEnabled={this.onToggleOnTop}
           onZoomIn={() => { this.editorRef.editor.trigger('editor', 'editor.action.fontZoomIn'); }}
           onZoomOut={() => { this.editorRef.editor.trigger('editor', 'editor.action.fontZoomOut'); }}
+          onCommandPalette={() => {
+            this.editorRef.editor.focus();
+            this.editorRef.editor.trigger('editor', 'editor.action.quickCommand');
+          }}
+          focusEditor={() => { this.editorRef.editor.focus(); }}
           baseZIndex={0}
         />
         <div

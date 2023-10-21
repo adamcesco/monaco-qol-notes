@@ -5,7 +5,7 @@ import { appWindow } from '@tauri-apps/api/window';
 
 class MonacoEditorWrapper extends React.Component {
   static onEditorTextFocus() {
-    appWindow.emit('editor-focus');
+    appWindow.emit('close-menu-windows');
   }
 
   constructor(props) {
@@ -13,7 +13,6 @@ class MonacoEditorWrapper extends React.Component {
     this.onChangeModelContent = this.onChangeModelContent.bind(this);
     this.onEditorDidMount = this.onEditorDidMount.bind(this);
     this.onEditorTextBlur = this.onEditorTextBlur.bind(this);
-    this.unlistenReqEditorFocusRef = React.createRef();
     this.editor = null;
     this.didChangeModelContent = React.createRef();
     this.state = { decorations: null };
@@ -38,15 +37,6 @@ class MonacoEditorWrapper extends React.Component {
       },
     });
     monaco.editor.setTheme('myTheme');
-
-    this.unlistenReqEditorFocusRef.current = appWindow.listen('request-editor-focus', () => {
-      if (this.editor === null) {
-        return;
-      }
-
-      this.editor.focus();
-      appWindow.emit('editor-focus');
-    });
   }
 
   onChangeModelContent() {

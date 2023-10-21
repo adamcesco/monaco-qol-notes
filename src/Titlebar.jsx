@@ -6,23 +6,13 @@ import './Titlebar.css';
 // todo: upgrade icons
 
 class Titlebar extends React.Component {
-  static setButtonVisuals(buttonRef, color, icon = null) {
-    if (buttonRef === null) {
-      return;
-    }
-    const { style, childNodes } = buttonRef;
-    if (icon !== null) {
-      childNodes[0].src = icon;
-    }
-
-    style.backgroundColor = color;
-  }
-
   constructor() {
     super();
     this.unlistenResizedRef = React.createRef();
     this.unlistenEditorFocusRef = React.createRef();
     this.onKeyDown = this.onKeyDown.bind(this);
+    this.fileMenuButton = null;
+    this.viewMenuButton = null;
     this.fileMenuWindowRef = null;
     this.viewMenuWindowRef = null;
     this.state = {
@@ -45,7 +35,7 @@ class Titlebar extends React.Component {
         this.setState({ maximizeIcon: 'https://api.iconify.design/mdi:window-maximize.svg' });
       });
     });
-    this.unlistenEditorFocusRef.current = appWindow.listen('editor-focus', () => {
+    this.unlistenEditorFocusRef.current = appWindow.listen('close-menu-windows', () => {
       this.setState({
         displayFileMenu: false,
         displayViewMenu: false,
@@ -56,13 +46,22 @@ class Titlebar extends React.Component {
   componentDidUpdate() {
     const { displayFileMenu, displayViewMenu, menuArrowIndex } = this.state;
     const { fileMenuWindowRef, viewMenuWindowRef } = this;
-    // if the file menu is open, highlight the selected option
-    if (displayFileMenu && menuArrowIndex !== -1) {
-      fileMenuWindowRef.childNodes[menuArrowIndex].focus();
+    // darken background color for menu button when a menu is open
+    if (displayFileMenu) {
+      this.fileMenuButton.classList.add('menu-open');
+      if (menuArrowIndex !== -1) {
+        fileMenuWindowRef.childNodes[menuArrowIndex].focus();
+      }
+    } else {
+      this.fileMenuButton.classList.remove('menu-open');
     }
-    // if the view menu is open, highlight the selected option
-    if (displayViewMenu && menuArrowIndex !== -1) {
-      viewMenuWindowRef.childNodes[menuArrowIndex].focus();
+    if (displayViewMenu) {
+      this.viewMenuButton.classList.add('menu-open');
+      if (menuArrowIndex !== -1) {
+        viewMenuWindowRef.childNodes[menuArrowIndex].focus();
+      }
+    } else {
+      this.viewMenuButton.classList.remove('menu-open');
     }
   }
 
@@ -73,6 +72,7 @@ class Titlebar extends React.Component {
 
   onKeyDown(event) {
     const { displayFileMenu, displayViewMenu } = this.state;
+    const { focusEditor } = this.props;
     const { key } = event;
     const arrowUpPressed = key === 'ArrowUp';
     const arrowDownPressed = key === 'ArrowDown';
@@ -103,7 +103,7 @@ class Titlebar extends React.Component {
       if (escapePressed) {
         event.preventDefault();
         this.setState({ displayFileMenu: false });
-        appWindow.emit('request-editor-focus');
+        focusEditor();
       }
     }
 
@@ -133,7 +133,7 @@ class Titlebar extends React.Component {
       if (escapePressed) {
         event.preventDefault();
         this.setState({ displayFileMenu: false });
-        appWindow.emit('request-editor-focus');
+        focusEditor();
       }
     }
   }
@@ -142,9 +142,12 @@ class Titlebar extends React.Component {
     const {
       onOpen,
       onSave,
+      onClose,
       onAOTEnabled,
       onZoomIn,
       onZoomOut,
+      onCommandPalette,
+      focusEditor,
       baseZIndex,
     } = this.props;
     const { maximizeIcon } = this.state;
@@ -157,8 +160,9 @@ class Titlebar extends React.Component {
       >
         <div className="menu-bar">
           <button
+            ref={(ref) => { this.fileMenuButton = ref; }}
             type="button"
-            className="titlebar-button"
+            className="titlebar-button menu-titlebar-button"
             aria-label="file menu button"
             onClick={() => {
               this.setState({
@@ -171,39 +175,48 @@ class Titlebar extends React.Component {
             File
           </button>
           {displayFileMenu ? (
-            <div className="menu-window" ref={(ref) => { this.fileMenuWindowRef = ref; }} style={{ zIndex: baseZIndex + 1 }}>
+            <div
+              ref={(ref) => { this.fileMenuWindowRef = ref; }}
+              className="menu-window"
+              style={{
+                zIndex: baseZIndex + 1,
+                top: this.fileMenuButton.offsetTop + this.fileMenuButton.offsetHeight,
+                left: this.fileMenuButton.offsetLeft,
+              }}
+            >
               <button
                 type="button"
                 className="menu-option"
                 aria-label="open"
-                onClick={() => { onOpen(); appWindow.emit('request-editor-focus'); }}
+                onClick={() => { onOpen(); focusEditor(); }}
               >
                 <p>Open</p>
-                <p>Ctrl+O</p>
+                <p className="internal-menu-option-keybind">Ctrl+O</p>
               </button>
               <button
                 type="button"
                 className="menu-option"
                 aria-label="save"
-                onClick={() => { onSave(false); appWindow.emit('request-editor-focus'); }}
+                onClick={() => { onSave(false); focusEditor(); }}
               >
                 <p>Save</p>
-                <p>Ctrl+S</p>
+                <p className="internal-menu-option-keybind">Ctrl+S</p>
               </button>
               <button
                 type="button"
                 className="menu-option"
                 aria-label="save as"
-                onClick={() => { onSave(true); appWindow.emit('request-editor-focus'); }}
+                onClick={() => { onSave(true); focusEditor(); }}
               >
-                <p>Save As</p>
-                <p>Ctrl+Shift+S</p>
+                <p>Save As...</p>
+                <p className="internal-menu-option-keybind">Ctrl+Shift+S</p>
               </button>
             </div>
           ) : null}
           <button
+            ref={(ref) => { this.viewMenuButton = ref; }}
             type="button"
-            className="titlebar-button"
+            className="titlebar-button menu-titlebar-button"
             aria-label="view menu button"
             onClick={() => {
               this.setState({
@@ -216,36 +229,58 @@ class Titlebar extends React.Component {
             View
           </button>
           {displayViewMenu ? (
-            <div className="menu-window" ref={(ref) => { this.viewMenuWindowRef = ref; }} style={{ zIndex: baseZIndex + 1 }}>
+            <div
+              ref={(ref) => { this.viewMenuWindowRef = ref; }}
+              className="menu-window"
+              style={{
+                zIndex: baseZIndex + 1,
+                top: this.viewMenuButton.offsetTop + this.viewMenuButton.offsetHeight,
+                left: this.viewMenuButton.offsetLeft,
+              }}
+            >
               <button
                 type="button"
                 className="menu-option"
                 aria-label="toggle always on top"
-                onClick={() => { onAOTEnabled(); appWindow.emit('request-editor-focus'); }}
+                onClick={() => { onAOTEnabled(); focusEditor(); }}
               >
                 <p>Toggle Always on Top</p>
-                <p>Ctrl+T</p>
+                <p className="internal-menu-option-keybind">Ctrl+T</p>
               </button>
               <button
                 type="button"
                 className="menu-option"
                 aria-label="zoom in"
-                onClick={() => { onZoomIn(); }}
+                onClick={(event) => { onZoomIn(); event.target.blur(); }}
               >
                 <p>Zoom In</p>
-                <p>Ctrl+=</p>
+                <p className="internal-menu-option-keybind">Ctrl+=</p>
               </button>
               <button
                 type="button"
                 className="menu-option"
                 aria-label="zoom out"
-                onClick={() => { onZoomOut(); }}
+                onClick={(event) => { onZoomOut(); event.target.blur(); }}
               >
                 <p>Zoom Out</p>
-                <p>Ctrl+-</p>
+                <p className="internal-menu-option-keybind">Ctrl+-</p>
               </button>
             </div>
           ) : null}
+          <button
+            type="button"
+            className="titlebar-button menu-titlebar-button"
+            aria-label="view menu button"
+            onClick={() => {
+              this.setState({
+                displayFileMenu: false,
+                displayViewMenu: false,
+              });
+              onCommandPalette();
+            }}
+          >
+            Command Palette
+          </button>
         </div>
         <div className="window-action-bar">
           <button
@@ -275,7 +310,7 @@ class Titlebar extends React.Component {
             className="titlebar-button"
             id="quit-button"
             aria-label="close"
-            onClick={() => { appWindow.emit('xclose-requested'); }}
+            onClick={() => { onClose(); }}
           >
             <img
               src="https://api.iconify.design/mdi:close.svg"
@@ -290,9 +325,12 @@ class Titlebar extends React.Component {
 Titlebar.propTypes = {
   onOpen: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
   onAOTEnabled: PropTypes.func.isRequired,
   onZoomIn: PropTypes.func.isRequired,
   onZoomOut: PropTypes.func.isRequired,
+  onCommandPalette: PropTypes.func.isRequired,
+  focusEditor: PropTypes.func.isRequired,
   baseZIndex: PropTypes.number.isRequired,
 };
 

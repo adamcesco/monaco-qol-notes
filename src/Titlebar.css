@@ -14,13 +14,18 @@
 
 .menu-window {
     position: absolute;
+    top: 0;
+    left: 0;
     user-select: none;
     display: flex;
     flex-direction: column;
     border: 0;
-    padding: 0;
+    padding-top: .25rem;
+    padding-bottom: .25rem;
     margin: 0;
     background-color: beige;
+    border-radius: .4rem;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
 .menu-option {
@@ -29,8 +34,10 @@
     align-items: center;
     height: 1.75rem;
     border: 0;
-    padding: 0;
-    margin: 0;
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+    margin-left: .25rem;
+    margin-right: .25rem;
     background-color: transparent;
     border-radius: .4rem;
 }
@@ -43,6 +50,10 @@
     background-color: #e0e0e0;
 }
 
+.internal-menu-option-keybind {
+    margin-left: 4.5rem;
+}
+
 .window-action-bar {
     user-select: none;
     display: flex;
@@ -53,12 +64,17 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: 1.6rem;
-    height: 1.6rem;
+    min-width: 2rem;
+    height: 2rem;
     border: 0;
     padding: 0;
     margin: 0;
     background-color: transparent;
+}
+
+.menu-titlebar-button {
+    padding-left: .4rem;
+    padding-right: .4rem;
 }
 
 .titlebar-button:hover {
@@ -67,4 +83,8 @@
 
 #quit-button:hover {
     background-color: #f44336;
+}
+
+.menu-open {
+    background-color: #e0e0e0;
 }

@@ -11,8 +11,6 @@ import Titlebar from './Titlebar';
 // todo: add viewable list of keybinds
 // todo: allow users to change theme
 // todo: allow users to change keybinds
-// todo: give users a visual indicator of unsaved changes
-// todo: give users a visual indicator of always on top
 
 class App extends React.Component {
   constructor() {
@@ -28,6 +26,7 @@ class App extends React.Component {
     this.editorRef = null;
     this.state = {
       onTop: false,
+      editorContentChanged: false,
     };
   }
 
@@ -105,6 +104,9 @@ class App extends React.Component {
     const filePathVal = saveAs ? null : this.filePathRef.current;
     if (filePathVal !== null && filePathVal === this.filePathRef.current) {
       invoke('write_file', { invokePath: filePathVal, invokeContent: this.editorRef.editor.getValue() })
+        .then(() => {
+          this.setState({ editorContentChanged: false });
+        })
         .catch(async (error) => {
           await message(`An error occured while saving to the following filepath: ${filePathVal}.\n\nThe details of the error are: ${error}`, { title: 'File Saving Error', type: 'error' });
         });
@@ -122,16 +124,17 @@ class App extends React.Component {
       invoke('write_file', { invokePath: filePath, invokeContent: this.editorRef.editor.getValue() })
         .then(() => {
           this.filePathRef.current = filePath;
+          this.setState({ editorContentChanged: false });
         })
         .catch(async (error) => {
           await message(`An error occured while saving to the following filepath: ${filePath}.\n\nThe details of the error are: ${error}`, { title: 'File Saving Error', type: 'error' });
         });
-      this.editorRef.didChangeModelContent.current = false;
     }
   }
 
   async onOpen() {
-    if (this.editorRef.didChangeModelContent.current === true) {
+    const { editorContentChanged } = this.state;
+    if (editorContentChanged === true) {
       const yesOpen = await confirm('You have unsaved changes. Continue?', { title: 'Contiue?', okLabel: 'Yes', type: 'warning' });
       if (yesOpen === false) {
         return;
@@ -149,6 +152,7 @@ class App extends React.Component {
         .then((result) => {
           this.filePathRef.current = filePath;
           this.editorRef.editor.setValue(result);
+          this.setState({ editorContentChanged: false });
         })
         .catch(async (error) => {
           await message(`An error occured while opening the following filepath: ${filePath}.\n\nThe details of the error are: ${error}`, { title: 'File Opening Error', type: 'error' });
@@ -163,7 +167,8 @@ class App extends React.Component {
   }
 
   async onClose(event) {
-    if (this.editorRef.didChangeModelContent.current === false) {
+    const { editorContentChanged } = this.state;
+    if (editorContentChanged === false) {
       appWindow.close();
       return;
     }
@@ -176,6 +181,7 @@ class App extends React.Component {
   }
 
   render() {
+    const { onTop, editorContentChanged } = this.state;
     return (
       <>
         <Titlebar
@@ -189,7 +195,9 @@ class App extends React.Component {
             this.editorRef.editor.focus();
             this.editorRef.editor.trigger('editor', 'editor.action.quickCommand');
           }}
+          editorContentChanged={editorContentChanged}
           focusEditor={() => { this.editorRef.editor.focus(); }}
+          isOnTop={onTop}
           baseZIndex={0}
         />
         <div
@@ -197,6 +205,7 @@ class App extends React.Component {
         >
           <MonacoEditorWrapper
             ref={(ref) => { this.editorRef = ref; }}
+            contentDidChange={() => { this.setState({ editorContentChanged: true }); }}
           />
         </div>
       </>

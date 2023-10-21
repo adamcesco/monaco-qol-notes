@@ -1,5 +1,6 @@
 import MonacoEditor from '@monaco-editor/react';
 import React from 'react';
+import PropTypes from 'prop-types';
 import './MonacoEditorWrapper.css';
 import { appWindow } from '@tauri-apps/api/window';
 
@@ -14,7 +15,6 @@ class MonacoEditorWrapper extends React.Component {
     this.onEditorDidMount = this.onEditorDidMount.bind(this);
     this.onEditorTextBlur = this.onEditorTextBlur.bind(this);
     this.editor = null;
-    this.didChangeModelContent = React.createRef();
     this.state = { decorations: null };
   }
 
@@ -25,7 +25,6 @@ class MonacoEditorWrapper extends React.Component {
   onEditorDidMount(editor, monaco) {
     this.editor = editor;
     this.editor.onDidChangeModelContent(this.onChangeModelContent);
-    this.didChangeModelContent.current = false;
     this.editor.onDidBlurEditorText(this.onEditorTextBlur);
     this.editor.onDidFocusEditorText(MonacoEditorWrapper.onEditorTextFocus);
     monaco.editor.defineTheme('myTheme', {
@@ -40,8 +39,9 @@ class MonacoEditorWrapper extends React.Component {
   }
 
   onChangeModelContent() {
-    this.didChangeModelContent.current = true;
+    const { contentDidChange } = this.props;
     const { decorations } = this.state;
+    contentDidChange();
     if (decorations === null) {
       return;
     }
@@ -117,5 +117,8 @@ class MonacoEditorWrapper extends React.Component {
     );
   }
 }
+MonacoEditorWrapper.propTypes = {
+  contentDidChange: PropTypes.func.isRequired,
+};
 
 export default MonacoEditorWrapper;

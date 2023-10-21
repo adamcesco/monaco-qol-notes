@@ -2,14 +2,12 @@
     top: 0;
     user-select: none;
     display: flex;
-    vertical-align: middle;
     justify-content: space-between;
 }
 
 .menu-bar {
     user-select: none;
     display: flex;
-    vertical-align: middle;
 }
 
 .menu-window {
@@ -57,7 +55,7 @@
 .window-action-bar {
     user-select: none;
     display: flex;
-    vertical-align: middle;
+    align-items: middle;
 }
 
 .titlebar-button {
@@ -87,4 +85,21 @@
 
 .menu-open {
     background-color: #e0e0e0;
+}
+
+.window-stater {
+    display: inline-flex;
+    background-color: gray;
+    width: .75rem;
+    height: 1.7rem;
+    margin-right: .15rem;
+    border-radius: .4rem .4rem .2rem .2rem;
+}
+
+.ticked-state {
+    background-color: #f44336;
+}
+
+#aot-stater {
+    margin-right: .5rem;
 }

@@ -4,6 +4,7 @@ import { appWindow } from '@tauri-apps/api/window';
 import './Titlebar.css';
 
 // todo: upgrade icons
+// todo: clean css
 
 class Titlebar extends React.Component {
   constructor() {
@@ -15,6 +16,8 @@ class Titlebar extends React.Component {
     this.viewMenuButton = null;
     this.fileMenuWindowRef = null;
     this.viewMenuWindowRef = null;
+    this.isSavedRef = null;
+    this.isAOTRef = null;
     this.state = {
       // in tauri.config.json, we set the window to not be maximized by default
       maximizeIcon: 'https://api.iconify.design/mdi:window-maximize.svg',
@@ -45,8 +48,14 @@ class Titlebar extends React.Component {
 
   componentDidUpdate() {
     const { displayFileMenu, displayViewMenu, menuArrowIndex } = this.state;
-    const { fileMenuWindowRef, viewMenuWindowRef } = this;
-    // darken background color for menu button when a menu is open
+    const { editorContentChanged, isOnTop } = this.props;
+    const {
+      fileMenuWindowRef,
+      viewMenuWindowRef,
+      isSavedRef,
+      isAOTRef,
+    } = this;
+
     if (displayFileMenu) {
       this.fileMenuButton.classList.add('menu-open');
       if (menuArrowIndex !== -1) {
@@ -62,6 +71,19 @@ class Titlebar extends React.Component {
       }
     } else {
       this.viewMenuButton.classList.remove('menu-open');
+    }
+
+    if (editorContentChanged) {
+      isSavedRef.classList.add('ticked-state');
+    } else {
+      isSavedRef.classList.remove('ticked-state');
+    }
+
+    // is the window on top?
+    if (isOnTop) {
+      isAOTRef.classList.add('ticked-state');
+    } else {
+      isAOTRef.classList.remove('ticked-state');
     }
   }
 
@@ -159,6 +181,8 @@ class Titlebar extends React.Component {
         style={{ zIndex: baseZIndex }}
       >
         <div className="menu-bar">
+          <div ref={(ref) => { this.isSavedRef = ref; }} className="window-stater" />
+          <div ref={(ref) => { this.isAOTRef = ref; }} id="aot-stater" className="window-stater" />
           <button
             ref={(ref) => { this.fileMenuButton = ref; }}
             type="button"
@@ -331,6 +355,8 @@ Titlebar.propTypes = {
   onZoomOut: PropTypes.func.isRequired,
   onCommandPalette: PropTypes.func.isRequired,
   focusEditor: PropTypes.func.isRequired,
+  editorContentChanged: PropTypes.bool.isRequired,
+  isOnTop: PropTypes.bool.isRequired,
   baseZIndex: PropTypes.number.isRequired,
 };
 

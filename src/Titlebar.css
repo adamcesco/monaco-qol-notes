@@ -1,13 +1,8 @@
-.titlebar{
+.titlebar {
     top: 0;
     user-select: none;
     display: flex;
     justify-content: space-between;
-}
-
-.menu-bar {
-    user-select: none;
-    display: flex;
 }
 
 .menu-window {
@@ -21,9 +16,9 @@
     padding-top: .25rem;
     padding-bottom: .25rem;
     margin: 0;
-    background-color: beige;
+    background-color: #ffffff;
     border-radius: .4rem;
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
 .menu-option {
@@ -41,21 +36,15 @@
 }
 
 .menu-option:hover {
-    background-color: #e0e0e0;
+    background-color: #e2e6ec;
 }
 
 .menu-option:focus {
-    background-color: #e0e0e0;
+    background-color: #e2e6ec;
 }
 
 .internal-menu-option-keybind {
     margin-left: 4.5rem;
-}
-
-.window-action-bar {
-    user-select: none;
-    display: flex;
-    align-items: middle;
 }
 
 .titlebar-button {
@@ -78,13 +67,13 @@
 }
 
 .titlebar-button:hover {
-    background-color: #e0e0e0;
+    background-color: #d9dce3;
+}
+
+.titlebar-button-actuate {
+    background-color: #d9dce3;
 }
 
 #quit-button:hover {
     background-color: #f44336;
-}
-
-.menu-open {
-    background-color: #e0e0e0;
 }

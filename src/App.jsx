@@ -8,9 +8,9 @@ import MonacoEditorWrapper from './MonacoEditorWrapper';
 import Titlebar from './Titlebar';
 
 // todo: auto highlighting "to-do" comments
-// todo: add viewable list of keybinds
 // todo: allow users to change theme
 // todo: allow users to change keybinds
+// todo: save user settings like font size and theme
 
 class App extends React.Component {
   constructor() {
@@ -77,12 +77,12 @@ class App extends React.Component {
     if (onTop === true) {
       this.isAOTRef.style.backgroundColor = '#ff1744';
     } else {
-      this.isAOTRef.style.backgroundColor = '#e0e0e0';
+      this.isAOTRef.style.backgroundColor = '#d9dce3';
     }
     if (editorContentChanged === true) {
       this.isSavedRef.style.backgroundColor = '#ff1744';
     } else {
-      this.isSavedRef.style.backgroundColor = '#e0e0e0';
+      this.isSavedRef.style.backgroundColor = '#d9dce3';
     }
   }
 
@@ -218,7 +218,7 @@ class App extends React.Component {
               display: 'inline-flex',
               height: '.13rem',
               width: '4.5rem',
-              backgroundColor: '#e0e0e0',
+              backgroundColor: '#d9dce3',
               marginTop: '.3rem',
               marginBottom: '.45rem',
               marginRight: '.6rem',
@@ -230,7 +230,7 @@ class App extends React.Component {
               display: 'inline-flex',
               height: '.13rem',
               width: '4.5rem',
-              backgroundColor: '#e0e0e0',
+              backgroundColor: '#d9dce3',
               marginTop: '.3rem',
               marginBottom: '.45rem',
             }}

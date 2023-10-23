@@ -32,7 +32,7 @@ class MonacoEditorWrapper extends React.Component {
       inherit: true,
       rules: [],
       colors: {
-        'editor.lineHighlightBackground': '#EAEFF6',
+        'editor.lineHighlightBackground': '#eaeff6',
       },
     });
     monaco.editor.setTheme('myTheme');

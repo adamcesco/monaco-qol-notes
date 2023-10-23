@@ -3,9 +3,6 @@ import PropTypes from 'prop-types';
 import { appWindow } from '@tauri-apps/api/window';
 import './Titlebar.css';
 
-// todo: upgrade icons
-// todo: clean css
-
 class Titlebar extends React.Component {
   constructor() {
     super();
@@ -14,6 +11,8 @@ class Titlebar extends React.Component {
     this.onKeyDown = this.onKeyDown.bind(this);
     this.fileMenuButton = null;
     this.viewMenuButton = null;
+    this.zoomInMenuOptionButton = null;
+    this.zoomOutMenuOptionButton = null;
     this.fileMenuWindowRef = null;
     this.viewMenuWindowRef = null;
     this.state = {
@@ -52,20 +51,20 @@ class Titlebar extends React.Component {
     } = this;
 
     if (displayFileMenu) {
-      this.fileMenuButton.classList.add('menu-open');
+      this.fileMenuButton.classList.add('titlebar-button-actuate');
       if (menuArrowIndex !== -1) {
         fileMenuWindowRef.childNodes[menuArrowIndex].focus();
       }
     } else {
-      this.fileMenuButton.classList.remove('menu-open');
+      this.fileMenuButton.classList.remove('titlebar-button-actuate');
     }
     if (displayViewMenu) {
-      this.viewMenuButton.classList.add('menu-open');
+      this.viewMenuButton.classList.add('titlebar-button-actuate');
       if (menuArrowIndex !== -1) {
         viewMenuWindowRef.childNodes[menuArrowIndex].focus();
       }
     } else {
-      this.viewMenuButton.classList.remove('menu-open');
+      this.viewMenuButton.classList.remove('titlebar-button-actuate');
     }
   }
 
@@ -81,6 +80,7 @@ class Titlebar extends React.Component {
     const arrowUpPressed = key === 'ArrowUp';
     const arrowDownPressed = key === 'ArrowDown';
     const escapePressed = key === 'Escape' || key === 'Esc';
+
     if (displayFileMenu) {
       const { fileMenuWindowRef } = this;
       const { menuArrowIndex } = this.state;
@@ -106,7 +106,7 @@ class Titlebar extends React.Component {
       }
       if (escapePressed) {
         event.preventDefault();
-        this.setState({ displayFileMenu: false });
+        this.setState({ displayFileMenu: false, menuArrowIndex: -1 });
         focusEditor();
       }
     }
@@ -136,7 +136,7 @@ class Titlebar extends React.Component {
       }
       if (escapePressed) {
         event.preventDefault();
-        this.setState({ displayFileMenu: false });
+        this.setState({ displayViewMenu: false, menuArrowIndex: -1 });
         focusEditor();
       }
     }
@@ -154,7 +154,7 @@ class Titlebar extends React.Component {
       focusEditor,
       baseZIndex,
     } = this.props;
-    const { maximizeIcon } = this.state;
+    const { maximizeIcon, menuArrowIndex } = this.state;
     const { displayFileMenu, displayViewMenu } = this.state;
     return (
       <div
@@ -162,7 +162,12 @@ class Titlebar extends React.Component {
         className="titlebar"
         style={{ zIndex: baseZIndex }}
       >
-        <div className="menu-bar">
+        <div
+          style={{
+            userSelect: 'none',
+            display: 'flex',
+          }}
+        >
           <button
             ref={(ref) => { this.fileMenuButton = ref; }}
             type="button"
@@ -252,19 +257,29 @@ class Titlebar extends React.Component {
                 <p className="internal-menu-option-keybind">Ctrl+T</p>
               </button>
               <button
+                ref={(ref) => { this.zoomInMenuOptionButton = ref; }}
                 type="button"
                 className="menu-option"
                 aria-label="zoom in"
-                onClick={(event) => { onZoomIn(); event.target.blur(); }}
+                onClick={() => {
+                  onZoomIn();
+                  if (menuArrowIndex === -1) { this.zoomInMenuOptionButton.blur(); }
+                }}
+                onBlur={() => { this.setState({ menuArrowIndex: -1 }); }}
               >
                 <p>Zoom In</p>
                 <p className="internal-menu-option-keybind">Ctrl+=</p>
               </button>
               <button
+                ref={(ref) => { this.zoomOutMenuOptionButton = ref; }}
                 type="button"
                 className="menu-option"
                 aria-label="zoom out"
-                onClick={(event) => { onZoomOut(); event.target.blur(); }}
+                onClick={() => {
+                  onZoomOut();
+                  if (menuArrowIndex === -1) { this.zoomOutMenuOptionButton.blur(); }
+                }}
+                onBlur={() => { this.setState({ menuArrowIndex: -1 }); }}
               >
                 <p>Zoom Out</p>
                 <p className="internal-menu-option-keybind">Ctrl+-</p>
@@ -286,7 +301,13 @@ class Titlebar extends React.Component {
             COMMAND PALETTE
           </button>
         </div>
-        <div className="window-action-bar">
+        <div
+          style={{
+            userSelect: 'none',
+            display: 'flex',
+            alignItems: 'middle',
+          }}
+        >
           <button
             type="button"
             className="titlebar-button"

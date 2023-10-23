@@ -72,6 +72,20 @@ class App extends React.Component {
     });
   }
 
+  componentDidUpdate() {
+    const { onTop, editorContentChanged } = this.state;
+    if (onTop === true) {
+      this.isAOTRef.style.backgroundColor = '#ff1744';
+    } else {
+      this.isAOTRef.style.backgroundColor = '#e0e0e0';
+    }
+    if (editorContentChanged === true) {
+      this.isSavedRef.style.backgroundColor = '#ff1744';
+    } else {
+      this.isSavedRef.style.backgroundColor = '#e0e0e0';
+    }
+  }
+
   componentWillUnmount() {
     document.removeEventListener('keydown', this.onKeyDown);
     this.unlistenCloseRequestedRef.current.then((remove) => remove());
@@ -181,7 +195,6 @@ class App extends React.Component {
   }
 
   render() {
-    const { onTop, editorContentChanged } = this.state;
     return (
       <>
         <Titlebar
@@ -195,13 +208,39 @@ class App extends React.Component {
             this.editorRef.editor.focus();
             this.editorRef.editor.trigger('editor', 'editor.action.quickCommand');
           }}
-          editorContentChanged={editorContentChanged}
           focusEditor={() => { this.editorRef.editor.focus(); }}
-          isOnTop={onTop}
           baseZIndex={0}
         />
+        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <div
+            ref={(ref) => { this.isSavedRef = ref; }}
+            style={{
+              display: 'inline-flex',
+              height: '.13rem',
+              width: '4.5rem',
+              backgroundColor: '#e0e0e0',
+              marginTop: '.3rem',
+              marginBottom: '.45rem',
+              marginRight: '.6rem',
+            }}
+          />
+          <div
+            ref={(ref) => { this.isAOTRef = ref; }}
+            style={{
+              display: 'inline-flex',
+              height: '.13rem',
+              width: '4.5rem',
+              backgroundColor: '#e0e0e0',
+              marginTop: '.3rem',
+              marginBottom: '.45rem',
+            }}
+          />
+        </div>
         <div
-          style={{ zIndex: 0 }}
+          style={{
+            zIndex: 0,
+            boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px',
+          }}
         >
           <MonacoEditorWrapper
             ref={(ref) => { this.editorRef = ref; }}

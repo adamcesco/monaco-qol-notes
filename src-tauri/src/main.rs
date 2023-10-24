@@ -54,16 +54,18 @@ fn main() {
                     .into(),
                 ]),
             )),
+            CustomMenuItem::new("command-pallette", "Command Pallette")
+                .into(),
         ]))
         .on_menu_event(|event| match event.menu_item_id() {
             "file-open" => {
-                event.window().emit("menu-event", "open").unwrap();
+                event.window().emit("menu-event", "file-open").unwrap();
             }
             "file-save" => {
-                event.window().emit("menu-event", "save").unwrap();
+                event.window().emit("menu-event", "file-save").unwrap();
             }
             "file-save-as" => {
-                event.window().emit("menu-event", "save-as").unwrap();
+                event.window().emit("menu-event", "file-save-as").unwrap();
             }
             "tog-on-top" => {
                 event.window().emit("menu-event", "tog-on-top").unwrap();
@@ -73,6 +75,9 @@ fn main() {
             }
             "zoom-out" => {
                 event.window().emit("menu-event", "zoom-out").unwrap();
+            }
+            "command-pallette" => {
+                event.window().emit("menu-event", "command-pallette").unwrap();
             }
             _ => {}
         })

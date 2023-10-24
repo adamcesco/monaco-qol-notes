@@ -5,7 +5,7 @@ import { appWindow } from '@tauri-apps/api/window';
 // eslint-disable-next-line object-curly-newline
 import { save, open, message, confirm } from '@tauri-apps/api/dialog';
 import MonacoEditorWrapper from './MonacoEditorWrapper';
-import Titlebar from './Titlebar';
+import './App.css';
 
 // todo: auto highlighting "to-do" comments
 // todo: allow users to change theme
@@ -27,6 +27,7 @@ class App extends React.Component {
     this.state = {
       onTop: false,
       editorContentChanged: false,
+      title: 'Untitled',
     };
   }
 
@@ -35,17 +36,17 @@ class App extends React.Component {
     this.unlistenCloseRequestedRef.current = appWindow.onCloseRequested(this.onClose);
     this.unlistenFileMenuRef.current = listen('menu-event', async (event) => {
       switch (event.payload) {
-        case 'open': {
+        case 'file-open': {
           this.onOpen();
           break;
         }
 
-        case 'save': {
+        case 'file-save': {
           this.onSave(false);
           break;
         }
 
-        case 'save-as': {
+        case 'file-save-as': {
           this.onSave(true);
           break;
         }
@@ -62,6 +63,12 @@ class App extends React.Component {
 
         case 'zoom-out': {
           this.editorRef.editor.trigger('editor', 'editor.action.fontZoomOut');
+          break;
+        }
+
+        case 'command-pallette': {
+          this.editorRef.editor.focus();
+          this.editorRef.editor.trigger('editor', 'editor.action.quickCommand');
           break;
         }
 
@@ -195,51 +202,35 @@ class App extends React.Component {
   }
 
   render() {
+    const { title } = this.state;
     return (
       <>
-        <Titlebar
-          onOpen={this.onOpen}
-          onSave={this.onSave}
-          onClose={this.onClose}
-          onAOTEnabled={this.onToggleOnTop}
-          onZoomIn={() => { this.editorRef.editor.trigger('editor', 'editor.action.fontZoomIn'); }}
-          onZoomOut={() => { this.editorRef.editor.trigger('editor', 'editor.action.fontZoomOut'); }}
-          onCommandPalette={() => {
-            this.editorRef.editor.focus();
-            this.editorRef.editor.trigger('editor', 'editor.action.quickCommand');
-          }}
-          focusEditor={() => { this.editorRef.editor.focus(); }}
-          baseZIndex={0}
-        />
+        <div
+          id="titlebar"
+          style={{ zIndex: 0 }}
+        >
+          {title}
+        </div>
         <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
           <div
             ref={(ref) => { this.isSavedRef = ref; }}
+            className="visual-state-display"
             style={{
-              display: 'inline-flex',
-              height: '.13rem',
-              width: '4.5rem',
-              backgroundColor: '#d9dce3',
-              marginTop: '.3rem',
-              marginBottom: '.45rem',
+              zIndex: 1,
               marginRight: '.6rem',
             }}
           />
           <div
             ref={(ref) => { this.isAOTRef = ref; }}
+            className="visual-state-display"
             style={{
-              display: 'inline-flex',
-              height: '.13rem',
-              width: '4.5rem',
-              backgroundColor: '#d9dce3',
-              marginTop: '.3rem',
-              marginBottom: '.45rem',
+              zIndex: 1,
             }}
           />
         </div>
         <div
           style={{
             zIndex: 0,
-            boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px',
           }}
         >
           <MonacoEditorWrapper

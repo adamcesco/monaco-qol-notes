@@ -1,0 +1,13 @@
+#titlebar {
+    margin-top: 1rem;
+    margin-left: 1rem;
+}
+
+.visual-state-display {
+    display: inline-flex;
+    height: .13rem;
+    width: 4.5rem;
+    background-color: #d9dce3;
+    margin-top: .3rem;
+    margin-bottom: .45rem;
+}
